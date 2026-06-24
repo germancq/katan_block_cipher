@@ -97,9 +97,9 @@ async def load_plaintext_test(dut, katan_sw):
     ), f"ERROR STATE IN INCR_COUNTER, STATE={dut.encrypt_impl.current_state.value}"
 
     # load L1_reg and L2_reg
-    L2_val = dut.block_i.value & ((2**katan_sw.L2) - 1)
+    L2_val = int(dut.block_i.value) & ((2**katan_sw.L2) - 1)
     katan_sw.L2_reg = L2_val
-    L1_val = (dut.block_i.value >> (katan_sw.L2)) & ((2**katan_sw.L1) - 1)
+    L1_val = (int(dut.block_i.value) >> (katan_sw.L2)) & ((2**katan_sw.L1) - 1)
     katan_sw.L1_reg = L1_val
 
     print("plaintext is {}".format(hex(dut.block_i.value)))
