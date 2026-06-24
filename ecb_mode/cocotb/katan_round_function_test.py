@@ -14,7 +14,6 @@ import cocotb
 import katan
 import numpy as np
 from cocotb.clock import Clock
-from cocotb.regression import TestFactory
 from cocotb.triggers import FallingEdge, RisingEdge, Timer
 
 CLK_PERIOD = 20
@@ -27,7 +26,7 @@ async def n_cycles_clock(dut, n):
 
 
 def setup_dut(dut, key_reg_state, ir, katan_values, L1_reg, L2_reg):
-    cocotb.fork(Clock(dut.clk, CLK_PERIOD).start())
+    cocotb.start_soon(Clock(dut.clk, CLK_PERIOD, unit="ns").start())
     dut.rst.value = 0
     dut.start.value = 0
     dut.key_reg_state.value = key_reg_state
@@ -76,8 +75,10 @@ async def calculate_f_function_test(dut, fa, fb):
         dut.current_state.value == dut.CALCULATE_F.value
     ), f"ERROR STATE IN CALCULATE_F, STATE={dut.current_state.value}"
 
-    assert dut.f_reg_din[0].value == fa, f"ERROR in CALCULATE_F fa value must be {fa}"
-    assert dut.f_reg_din[1].value == fb, f"ERROR in CALCULATE_F fb value must be {fb}"
+    assert dut.f_reg_din[0].value == fa, f"ERROR in CALCULATE_F fa value must be {
+        fa}"
+    assert dut.f_reg_din[1].value == fb, f"ERROR in CALCULATE_F fb value must be {
+        fb}"
     assert dut.end_round.value == 0, f"ERROR in end_round signal"
 
 
@@ -97,7 +98,10 @@ async def end_state_function_test(dut, katan_cipher_sw):
 
 
 @cocotb.test()
+@cocotb.parametrize(index=range(0, 10))
 async def test(dut, index=0):
+    random.seed(index)
+
     N = 32
 
     if dut.L2_LEN.value == 19:
@@ -140,10 +144,3 @@ async def test(dut, index=0):
     await rst_function_test(dut)
     await calculate_f_function_test(dut, fa, fb)
     await end_state_function_test(dut, katan_cipher_sw)
-
-
-n = 0x15
-factory = TestFactory(test)
-
-factory.add_option("index", range(0, n))
-factory.generate_tests()

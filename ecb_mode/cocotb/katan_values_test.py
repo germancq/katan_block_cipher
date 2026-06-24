@@ -14,11 +14,11 @@ import cocotb
 import katan
 import numpy as np
 from cocotb.clock import Clock
-from cocotb.regression import TestFactory
 from cocotb.triggers import FallingEdge, RisingEdge, Timer
 
 
 @cocotb.test()
+@cocotb.parametrize(index=range(0, 10))
 async def test(dut, index=0):
     N = dut.N.value
     expected_values = katan.KATAN_VALUES[N]
@@ -66,10 +66,3 @@ async def test(dut, index=0):
     assert (
         dut.y6.value == expected_values["y6"]
     ), f'ERROR with y6, with N = {N}, expected_value = {expected_values["y6"]} and calculated = {dut.y6.value}'
-
-
-n = 0x5
-factory = TestFactory(test)
-
-factory.add_option("index", range(0, n))
-factory.generate_tests()

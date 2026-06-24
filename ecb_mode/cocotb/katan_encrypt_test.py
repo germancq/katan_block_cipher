@@ -21,7 +21,7 @@ CLK_PERIOD = 20
 
 
 def setup_dut(dut, key, plaintext):
-    cocotb.fork(Clock(dut.clk, CLK_PERIOD, "ns").start())
+    cocotb.start_soon(Clock(dut.clk, CLK_PERIOD, unit="ns").start())
     dut.rst.value = 0
     dut.key.value = key
     dut.block_i.value = plaintext
@@ -32,12 +32,12 @@ def setup_dut(dut, key, plaintext):
 async def rst_function_test(dut):
     dut.rst.value = 1
     await n_cycles_clock(dut, 1)
-    assert (
-        dut.encrypt_impl.current_state.value == dut.encrypt_impl.IDLE.value
+    assert int(dut.encrypt_impl.current_state.value) == int(
+        dut.encrypt_impl.IDLE.value
     ), f"ERROR STATE IN RST, STATE={dut.encrypt_impl.current_state.value}"
     await n_cycles_clock(dut, 10)
-    assert (
-        dut.encrypt_impl.current_state.value == dut.encrypt_impl.IDLE.value
+    assert int(dut.encrypt_impl.current_state.value) == int(
+        dut.encrypt_impl.IDLE.value
     ), f"ERROR STATE IN RST, STATE={dut.encrypt_impl.current_state.value}"
 
     assert dut.encrypt_impl.L1_reg_cl.value == 1, f"ERROR in L1_reg_cl signal"
@@ -55,24 +55,23 @@ async def rst_function_test(dut):
     assert (
         dut.encrypt_impl.lfsr_counter_state.value == 0xFF
     ), f"ERROR initial counter state"
-    assert (
-        dut.encrypt_impl.round_f_impl.current_state.value
-        == dut.encrypt_impl.round_f_impl.IDLE
+    assert int(dut.encrypt_impl.round_f_impl.current_state.value) == int(
+        dut.encrypt_impl.round_f_impl.IDLE
     ), f"ERROR state in round_f"
 
 
 async def load_plaintext_test(dut, katan_sw):
     dut.rst.value = 0
     await n_cycles_clock(dut, 1)
-    assert (
-        dut.encrypt_impl.current_state.value == dut.encrypt_impl.IDLE.value
+    assert int(dut.encrypt_impl.current_state.value) == int(
+        dut.encrypt_impl.IDLE.value
     ), f"ERROR STATE IN RST, STATE={dut.encrypt_impl.current_state.value}"
 
     dut.rq_data.value = 1
     await n_cycles_clock(dut, 1)
 
-    assert (
-        dut.encrypt_impl.current_state.value == dut.encrypt_impl.LOAD_PLAINTEXT.value
+    assert int(dut.encrypt_impl.current_state.value) == int(
+        dut.encrypt_impl.LOAD_PLAINTEXT.value
     ), f"ERROR STATE IN LOAD_PLAINTEXT, STATE={dut.encrypt_impl.current_state.value}"
 
     print("L1_input is {}".format(hex(dut.encrypt_impl.L1_reg_din.value)))
@@ -93,8 +92,8 @@ async def load_plaintext_test(dut, katan_sw):
 
     await n_cycles_clock(dut, 1)
 
-    assert (
-        dut.encrypt_impl.current_state.value == dut.encrypt_impl.INCR_COUNTER.value
+    assert int(dut.encrypt_impl.current_state.value) == int(
+        dut.encrypt_impl.INCR_COUNTER.value
     ), f"ERROR STATE IN INCR_COUNTER, STATE={dut.encrypt_impl.current_state.value}"
 
     # load L1_reg and L2_reg
@@ -134,14 +133,14 @@ async def encrypt_loop_test(dut, katan_sw):
 
         i = i + 1
 
-        assert (
-            dut.encrypt_impl.current_state.value == dut.encrypt_impl.INCR_COUNTER.value
+        assert int(dut.encrypt_impl.current_state.value) == int(
+            dut.encrypt_impl.INCR_COUNTER.value
         ), f"ERROR STATE IN INCR_COUNTER, STATE={dut.encrypt_impl.current_state.value}"
 
         await n_cycles_clock(dut, 1)
 
-        assert (
-            dut.encrypt_impl.current_state.value == dut.encrypt_impl.CHECK_END.value
+        assert int(dut.encrypt_impl.current_state.value) == int(
+            dut.encrypt_impl.CHECK_END.value
         ), f"ERROR STATE IN CHECK_END, STATE={dut.encrypt_impl.current_state.value}"
 
         katan_sw.counter.step()
@@ -162,24 +161,21 @@ async def encrypt_loop_test(dut, katan_sw):
         for j in range(0, n):
             await n_cycles_clock(dut, 1)
 
-            assert (
-                dut.encrypt_impl.current_state.value
-                == dut.encrypt_impl.START_ROUND_F.value
+            assert int(dut.encrypt_impl.current_state.value) == int(
+                dut.encrypt_impl.START_ROUND_F.value
             ), f"ERROR STATE IN START_ROUND_F, STATE={dut.encrypt_impl.current_state.value}"
 
             await n_cycles_clock(dut, 1)
 
-            assert (
-                dut.encrypt_impl.current_state.value
-                == dut.encrypt_impl.WAIT_ROUND_F.value
+            assert int(dut.encrypt_impl.current_state.value) == int(
+                dut.encrypt_impl.WAIT_ROUND_F.value
             ), f"ERROR STATE IN WAIT_ROUND_F, STATE={dut.encrypt_impl.current_state.value}"
 
-            while dut.encrypt_impl.end_round == 0:
+            while dut.encrypt_impl.end_round.value == 0:
                 await n_cycles_clock(dut, 1)
 
-            assert (
-                dut.encrypt_impl.current_state.value
-                == dut.encrypt_impl.WAIT_ROUND_F.value
+            assert int(dut.encrypt_impl.current_state.value) == int(
+                dut.encrypt_impl.WAIT_ROUND_F.value
             ), f"ERROR STATE IN WAIT_ROUND_F, STATE={dut.encrypt_impl.current_state.value}"
 
             await n_cycles_clock(dut, 1)
@@ -200,13 +196,13 @@ async def encrypt_loop_test(dut, katan_sw):
                 dut.encrypt_impl.L2_reg_dout.value == katan_sw.L2_reg
             ), f"ERROR loading plaintext, expected={hex(katan_sw.L2_reg)}, calculated={hex(dut.encrypt_impl.L2_reg_dout.value)}"
 
-            assert (
-                dut.encrypt_impl.current_state.value == dut.encrypt_impl.CHECK_N.value
+            assert int(dut.encrypt_impl.current_state.value) == int(
+                dut.encrypt_impl.CHECK_N.value
             ), f"ERROR STATE IN CHECK_N, STATE={dut.encrypt_impl.current_state.value}"
 
         await n_cycles_clock(dut, 1)
-        assert (
-            dut.encrypt_impl.current_state.value == dut.encrypt_impl.SHIFT_KEY_1.value
+        assert int(dut.encrypt_impl.current_state.value) == int(
+            dut.encrypt_impl.SHIFT_KEY_1.value
         ), f"ERROR STATE IN SHIFT_KEY_1, STATE={dut.encrypt_impl.current_state.value}"
 
         katan_sw.key_reg.step()
@@ -217,8 +213,8 @@ async def encrypt_loop_test(dut, katan_sw):
             dut.encrypt_impl.lfsr_key_state.value == katan_sw.key_reg.get_state()
         ), f"ERROR in key state, expected={hex(katan_sw.key_reg.get_state())}, calculated = {hex(dut.encrypt_impl.lfsr_key_state.value)}"
 
-        assert (
-            dut.encrypt_impl.current_state.value == dut.encrypt_impl.SHIFT_KEY_2.value
+        assert int(dut.encrypt_impl.current_state.value) == int(
+            dut.encrypt_impl.SHIFT_KEY_2.value
         ), f"ERROR STATE IN SHIFT_KEY_1, STATE={dut.encrypt_impl.current_state.value}"
 
         katan_sw.key_reg.step()
@@ -232,8 +228,8 @@ async def encrypt_loop_test(dut, katan_sw):
 
 async def end_state_function_test(dut, katan_sw):
     await n_cycles_clock(dut, 1)
-    assert (
-        dut.encrypt_impl.current_state.value == dut.encrypt_impl.END_STATE.value
+    assert int(dut.encrypt_impl.current_state.value) == int(
+        dut.encrypt_impl.END_STATE.value
     ), f"ERROR STATE IN END, STATE={dut.encrypt_impl.current_state.value}"
     assert dut.end_signal.value == 1, f"ERROR in end_round signal"
 
@@ -251,8 +247,11 @@ async def n_cycles_clock(dut, n):
 
 
 @cocotb.test()
+@cocotb.parametrize(index=range(0, 10))
 async def test(dut, index=0):
     N = dut.N.value
+
+    random.seed(index)
 
     key = random.getrandbits(80)
     plaintext = random.getrandbits(N)
@@ -264,10 +263,3 @@ async def test(dut, index=0):
     await load_plaintext_test(dut, katan_cipher_sw)
     await encrypt_loop_test(dut, katan_cipher_sw)
     await end_state_function_test(dut, katan_cipher_sw)
-
-
-num = 0x15
-factory = TestFactory(test)
-
-factory.add_option("index", range(0, num))
-factory.generate_tests()
