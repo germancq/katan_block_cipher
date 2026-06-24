@@ -75,10 +75,10 @@ async def calculate_f_function_test(dut, fa, fb):
         dut.current_state.value == dut.CALCULATE_F.value
     ), f"ERROR STATE IN CALCULATE_F, STATE={dut.current_state.value}"
 
-    assert dut.f_reg_din[0].value == fa, f"ERROR in CALCULATE_F fa value must be {
-        fa}"
-    assert dut.f_reg_din[1].value == fb, f"ERROR in CALCULATE_F fb value must be {
-        fb}"
+    assert dut.f_reg_din[0].value == fa, f"ERROR in CALCULATE_F fa value must be \
+            {fa}"
+    assert dut.f_reg_din[1].value == fb, f"ERROR in CALCULATE_F fb value must be \
+    {fb}"
     assert dut.end_round.value == 0, f"ERROR in end_round signal"
 
 
