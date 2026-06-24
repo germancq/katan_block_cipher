@@ -49,12 +49,12 @@ def setup_dut(dut, key_reg_state, ir, katan_values, L1_reg, L2_reg):
 async def rst_function_test(dut):
     dut.rst.value = 1
     await n_cycles_clock(dut, 1)
-    assert (
-        dut.current_state.value == dut.IDLE.value
+    assert int(dut.current_state.value) == int(
+        dut.IDLE.value
     ), f"ERROR STATE IN RST, STATE={dut.current_state.value}"
     await n_cycles_clock(dut, 10)
-    assert (
-        dut.current_state.value == dut.IDLE.value
+    assert int(dut.current_state.value) == int(
+        dut.IDLE.value
     ), f"ERROR STATE IN RST, STATE={dut.current_state.value}"
     for i in range(0, 2):
         assert dut.f_reg_cl[i].value == 1, f"ERROR clear signals {i}"
@@ -66,13 +66,13 @@ async def rst_function_test(dut):
 async def calculate_f_function_test(dut, fa, fb):
     dut.rst.value = 0
     await n_cycles_clock(dut, 1)
-    assert (
-        dut.current_state.value == dut.IDLE.value
+    assert int(dut.current_state.value) == int(
+        dut.IDLE.value
     ), f"ERROR STATE IN RST, STATE={dut.current_state.value}"
     dut.start.value = 1
     await n_cycles_clock(dut, 1)
-    assert (
-        dut.current_state.value == dut.CALCULATE_F.value
+    assert int(dut.current_state.value) == int(
+        dut.CALCULATE_F.value
     ), f"ERROR STATE IN CALCULATE_F, STATE={dut.current_state.value}"
 
     assert dut.f_reg_din[0].value == fa, f"ERROR in CALCULATE_F fa value must be \
@@ -84,8 +84,8 @@ async def calculate_f_function_test(dut, fa, fb):
 
 async def end_state_function_test(dut, katan_cipher_sw):
     await n_cycles_clock(dut, 1)
-    assert (
-        dut.current_state.value == dut.END_STATE.value
+    assert int(dut.current_state.value) == int(
+        dut.END_STATE.value
     ), f"ERROR STATE IN END, STATE={dut.current_state.value}"
     assert dut.end_round.value == 1, f"ERROR in end_round signal"
     assert (
