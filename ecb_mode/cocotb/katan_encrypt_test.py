@@ -249,7 +249,7 @@ async def n_cycles_clock(dut, n):
 @cocotb.test()
 @cocotb.parametrize(index=range(0, 10))
 async def test(dut, index=0):
-    N = dut.N.value
+    N = int(dut.N.value)
 
     random.seed(index)
 

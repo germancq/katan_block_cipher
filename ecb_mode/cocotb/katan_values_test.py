@@ -20,7 +20,7 @@ from cocotb.triggers import FallingEdge, RisingEdge, Timer
 @cocotb.test()
 @cocotb.parametrize(index=range(0, 10))
 async def test(dut, index=0):
-    N = dut.N.value
+    N = int(dut.N.value)
     expected_values = katan.KATAN_VALUES[N]
 
     print(N)
